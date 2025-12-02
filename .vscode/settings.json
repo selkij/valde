@@ -1,0 +1,23 @@
+{
+    "makefile.makePath": "make",
+
+    "makefile.configurations": [
+        {
+            "name": "Debug",
+            "makeArgs": ["CONFIG=Debug"]
+        },
+        {
+            "name": "Release",
+            "makeArgs": ["CONFIG=Release"]
+        }
+    ],
+
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "makefile.launchConfigurations": [
+        {
+            "cwd": "/home/lain/Dev/valde/build/Debug",
+            "binaryPath": "/home/lain/Dev/valde/build/Debug/valde",
+            "binaryArgs": []
+        }
+    ]
+}
