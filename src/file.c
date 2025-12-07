@@ -6,7 +6,7 @@ char* file_content(struct entry* entry) {
     perror("entry is not a file.\n");
     return NULL;
   }
-
+  
   FILE* fptr = fopen(entry->path, "r");
   int count = entry->st.st_size;
   char* content = malloc(sizeof(char) * count);
