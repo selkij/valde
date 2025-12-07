@@ -1,5 +1,6 @@
 #include "include/file.h"
 
+// TODO: Comment.
 char* file_content(struct entry* entry) {
   if (is_dir(entry)) {
     perror("entry is not a file.\n");
@@ -15,8 +16,9 @@ char* file_content(struct entry* entry) {
     return NULL;
   }
 
+  // Memory cleanup.
   fread(content, sizeof(char), count, fptr);
-
   fclose(fptr);
+
   return content;
 }

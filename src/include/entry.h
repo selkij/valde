@@ -1,5 +1,5 @@
-#ifndef ENTRY
-#define ENTRY
+#ifndef ENTRY_H
+#define ENTRY_H
 
 #include <dirent.h>
 #include <errno.h>
@@ -8,6 +8,7 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <stdbool.h>
 
 struct entry {
   char* path;
@@ -17,8 +18,8 @@ struct entry {
 };
 
 bool is_dir(struct entry* entry);
-struct entry populate_entry(char* path);
-int populate_directory_entry(struct entry* entry);
-void entry_info(struct entry* entry);
+struct entry entry_populate(char* path);
+int entry_populate_dir(struct entry* entry);
+void entry_info(struct entry* entry, bool include_subentries);
 
-#endif /* ENTRY */
+#endif /* ENTRY_H */

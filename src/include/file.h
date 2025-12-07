@@ -1,8 +1,8 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef FILE
+#define FILE
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "entry.h"
 
-#endif // FILE_H
+#endif /* FILE */
