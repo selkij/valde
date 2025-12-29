@@ -2,21 +2,15 @@
 #include <stdlib.h>
 #include "include/entry.h"
 #include "include/fs.h"
-#include "include/screen.h"
+#include "include/display.h"
+#include "include/state.h"
 
-int test() {
-  fs_create_file("test.allaa");
-  getchar();
-  fs_delete_file("test.allaa");
-  getchar();
-  fs_create_dir("test");
-  getchar();
-  fs_delete_dir("test");
+int main(int argc, char* argv[]) {
+  printf("valde file manager\n\n");
 
-  return 0;
-}
+  State* state = state_init(argv[1]);
+  screen_init(state);
+  state_free(state);
 
-int main() {
-  printf("valde File manager\n\n");
-  return test();
+  return EXIT_SUCCESS;
 }

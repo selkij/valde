@@ -1,26 +1,9 @@
 # ===========================================================
-# Project Settings
-# ===========================================================
-
-PROJECT_NAME := valde
-
-# Project structure
-SRC_DIR     := src
-INC_DIR     := include
-BUILD_DIR   := build/$(CONFIG)
-
-# Auto-discover source files (recursive possible)
-SRC := $(wildcard $(SRC_DIR)/*.c)
-
-# Turn .c into .o inside build directory, keeping structure
-OBJ := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRC))
-
-# ===========================================================
 # Configuration Profiles
 # ===========================================================
 
 CONFIG ?= Debug
-ifeq ($(CONFIG),) # If CONFIG is empty set "Debug" by default.
+ifeq ($(CONFIG),)
 CONFIG := Debug
 endif
 
@@ -32,11 +15,25 @@ else
     $(error Unknown CONFIG='$(CONFIG)' (expected Debug or Release))
 endif
 
-CPPFLAGS := -I$(INC_DIR)
+CPPFLAGS := -Iinclude
 LDFLAGS  :=
 LDLIBS   := -lncurses
 
 CC := gcc
+
+# ===========================================================
+# Project Settings
+# ===========================================================
+
+PROJECT_NAME := valde
+
+SRC_DIR     := src
+INC_DIR     := include
+BUILD_DIR   := build/$(CONFIG)
+
+SRC := $(shell find $(SRC_DIR) -type f -name '*.c')
+
+OBJ := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC))
 
 # ===========================================================
 # Targets
@@ -44,23 +41,14 @@ CC := gcc
 
 all: $(BUILD_DIR)/$(PROJECT_NAME)
 
-# Link final binary
 $(BUILD_DIR)/$(PROJECT_NAME): $(OBJ)
 	@echo "Linking: $@"
 	$(CC) $(OBJ) $(LDFLAGS) $(LDLIBS) -o $@
 
-# Compile .c to .o
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
 	@echo "Compiling: $<"
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
-
-# Ensure build directory exists
-$(BUILD_DIR):
-	@mkdir -p $(BUILD_DIR)
-
-# ===========================================================
-# Convenience
-# ===========================================================
 
 run: all
 	./$(BUILD_DIR)/$(PROJECT_NAME)
@@ -68,7 +56,6 @@ run: all
 clean:
 	rm -rf build
 
-# Print discovered sources/objects (debugging Makefile)
 print:
 	@echo "SRC: $(SRC)"
 	@echo "OBJ: $(OBJ)"

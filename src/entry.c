@@ -1,47 +1,60 @@
 #include "include/entry.h"
 
-// TODO: Better error messages.
-// TODO: Comment.
-
+/// @brief Tells if the entry is a directory.
+/// @param entry The entry to check.
+/// @return returns true if entry is a directory, false otherwise.
 bool is_dir(struct entry* entry) {
   return S_ISDIR(entry->st.st_mode);
 }
 
-struct entry entry_populate(char* path) {
+/// @brief Populates an entry struct for the given path.
+/// @param path The path to populate the entry for.
+/// @return The populated entry struct. If an error occurs, a dummy struct with path set to NULL is returned.
+struct entry entry_populate(const char* path) {
   struct stat st;
   struct entry entry;
-  struct entry dummy;
+  struct entry dummy; // Used when an error occurs.
   dummy.path = NULL;
+
+  if(lstat(path, &st) != 0) {
+    printf("TEST %s\n", path);
+    fprintf(stderr, "Could not populate entry %s: %s\n", path, strerror(errno));
+    perror("lstat");
+    return dummy;
+  }
   
-  if(stat(path, &st) != 0) {
-    if(errno == ENOENT || errno == ELOOP || errno == ENOTDIR) { // Conditions to determine if it's a symlink.
-      if(lstat(path, &st) != 0) { // If stat fails, it's a symlink, and using lstat also fails.
-        fprintf(stderr, "Got lstat error, can't proceed.\n");
-        return dummy;
-      }
-    } else { // If using stat fails and it isn't because it is a symlink.
-      fprintf(stderr, "Got stat error trying to populate entry %s.\n", path);
+  if(S_ISLNK(st.st_mode)) {
+    struct stat target;
+
+    if(stat(path, &target) != 0) {
+      fprintf(stderr, "Could not populate entry %s: %s\n", path, strerror(errno));
       return dummy;
     }
+    
+    entry.st = target; // Use target stat info for symlinks.
+  } else {
+    entry.st = st;
   }
 
-  entry.path = path; // FIXME: populate real path, for example if its set to "../", it will be "../", not the real path
-  entry.st = st;
+  entry.path = path;
 
   return entry; // The dummy struct is returned if something went wrong.
 }
 
-int entry_populate_dir(struct entry* entry) { // TODO: Move to directory.c, maybe remove entries from the struct.
+/// @brief Populates the entries of a directory entry.
+/// @param entry The directory entry to populate.
+/// @return Returns EXIT_SUCCESS on success, error code otherwise.
+int entry_populate_dir(struct entry* entry) {
   if(!S_ISDIR(entry->st.st_mode)) { // Entry is not a directory.
-    fprintf(stderr, "Entry is not a directory.");
-    return 1;
+    fprintf(stderr, "Entry is not a directory for %s.", entry->path);
+    return NOT_A_DIRECTORY;
   }
 
   struct dirent* de;
   DIR* dir = opendir(entry->path);
 
   if(dir == NULL) { // Error trying to open dir
-    fprintf(stderr, "Could not open dir.\n");
+    fprintf(stderr, "Could not open dir %s: %s\n", entry->path, strerror(errno));
     return 1;
   }
 
@@ -58,37 +71,52 @@ int entry_populate_dir(struct entry* entry) { // TODO: Move to directory.c, mayb
       free(entries);
       closedir(dir);
 
-      fprintf(stderr, "An error occured trying to realloc entries.\n");
-      return 1;
+      fprintf(stderr, "An error occured trying to realloc entries: %s\n", strerror(errno));
+      return ALLOCATION_FAILURE;
     }
 
     entries = temp; // Update the entries object.
 
+
+
     struct entry temp_entry;
-    size_t length = strlen(entry->path) + strlen(de->d_name) + 1;
-    char* path = malloc(length);
-    snprintf(path, length, "%s%s", entry->path, de->d_name);
-    
-    temp_entry = entry_populate(path);
+
+    if(string_ends_with(entry->path, "/")) { // Whether the entry path already ends with a '/' or not.
+      size_t length = strlen(entry->path) + strlen(de->d_name) + 1; // +1 for null terminator.
+      char* path = malloc(length);
+
+      snprintf(path, length, "%s%s", entry->path, de->d_name);
+      temp_entry = entry_populate(path);
+    } else {
+      size_t length = strlen(entry->path) + strlen(de->d_name) + 2; // +2 for '/' and null terminator.
+      char* path = malloc(length);
+
+      snprintf(path, length, "%s/%s", entry->path, de->d_name);
+      temp_entry = entry_populate(path);
+    }
     
     if(temp_entry.path == NULL) {
-      fprintf(stderr, "Got an error trying to populate %s\n", entry->path);
-      return 1;
+      fprintf(stderr, "Got an error trying to populate %s: %s\n", entry->path, strerror(errno));
+      return POPULATE_FAILURE;
     }
      
     entries[count] = temp_entry;
     
     count++;
   }
+
   entry->entries = entries;
   entry->entry_count = count;
 
   // Memory cleanup
   closedir(dir);
 
-  return 0;
+  return EXIT_SUCCESS;
 }
 
+/// @brief Prints information about an entry.
+/// @param entry The entry to print information about.
+/// @param include_subentries Wether to include subentries information (if directory) or not.
 void entry_info(struct entry* entry, bool include_subentries) {
   printf("File: %s\n", entry->path);
   printf("Size: %ld bytes\n", entry->st.st_size);
@@ -116,5 +144,4 @@ void entry_info(struct entry* entry, bool include_subentries) {
     printf("Is regular file? %s\n", S_ISREG(sub_entry.st.st_mode) ? "Yes" : "No");
     printf("---\n");
   }
-
 }
