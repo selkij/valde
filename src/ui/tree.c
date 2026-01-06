@@ -3,20 +3,14 @@
 /// @brief Initialize the tree window.
 /// @param LINES Maximum Y dimension of the terminal.
 /// @param COLS Maximum X dimension of the terminal.
-/// @param state The app state struct.
 /// @return The initialized tree window. NULL on failure.
-WINDOW* tree_win_init(int LINES, int COLS) {
-    WINDOW *tree_win;
-    tree_win = newwin(LINES-1, COLS / 5, 1, 0);
+WINDOW* tree_win_init(const int LINES, const int COLS) {
+    WINDOW *tree_win = newwin(LINES - 1, COLS / 5, 1, 0);
 
     if(tree_win == NULL) {
         fprintf(stderr, "Error creating tree window.\n");
         return NULL;
     }
-
-    wattron(tree_win, COLOR_PAIR(1));
-    box(tree_win, 0 , 0);
-    wattroff(tree_win, COLOR_PAIR(1));
 
     refresh();
     wrefresh(tree_win);
@@ -29,16 +23,16 @@ WINDOW* tree_win_init(int LINES, int COLS) {
 /// @param state The app state struct.
 /// @param entry The entry to add.
 /// @param index The index at which to add the entry.
-void tree_add_entry(WINDOW* tree_win, State* state, struct entry* entry, int index) {
+void tree_add_entry(WINDOW* tree_win, const State* state, const struct entry* entry, const int index) {
     if(tree_win == NULL || entry == NULL) {
         fprintf(stderr, "tree_add_entry: Invalid parameters.\n");
         return;
     }
 
-    char* cwd = string_append_slash(state_get_cwd(state));
+    const char* cwd = string_append_slash(state_get_cwd(state));
     const char* path = strcmp(strip_prefix(entry->path, cwd), "") == 0 ? cwd : strip_prefix(entry->path, cwd);
 
-    if(is_dir(entry)) {
+    if(entry_is_dir(entry)) {
         wattron(tree_win, A_BOLD);
         wattron(tree_win, COLOR_PAIR(2));
         mvwprintw(tree_win, index, 1, "%s\n", string_append_slash(path));
@@ -52,21 +46,21 @@ void tree_add_entry(WINDOW* tree_win, State* state, struct entry* entry, int ind
     wrefresh(tree_win);
 }
 
-void tree_list_entries(WINDOW* tree_win, State* state, struct entry* root_entry) {
+void tree_list_entries(WINDOW* tree_win, const State* state, const struct entry* root_entry) {
     if(tree_win == NULL || root_entry == NULL) {
         fprintf(stderr, "tree_list_entries: Invalid parameters.\n");
         return;
     }
 
-    if(is_dir(root_entry) == false) {
+    if(entry_is_dir(root_entry) == false) {
         fprintf(stderr, "tree_list_entries: root_entry is not a directory.\n");
         return;
     }
 
     tree_add_entry(tree_win, state, root_entry, 0); // Add root entry first.
-    
 
     for(size_t i = 1; i < root_entry->entry_count; i++) { // FIXME: makes the terminal go kaboom.
-        tree_add_entry(tree_win, state, &root_entry->entries[i], i);
+        tree_add_entry(tree_win, state, &root_entry->entries[i], (int) i);
     }
 }
+

@@ -38,7 +38,7 @@ void state_free(State* state) {
 /// @brief Change the current working directory.
 /// @param state The state struct to update.
 /// @param new_cwd The new current working directory.
-void state_set_cwd(State* state, const char* new_cwd) {
+void state_set_cwd(const State* state, const char* new_cwd) {
     if(state != NULL && new_cwd != NULL) {
         snprintf(state->cwd, PATH_MAX, "%s", new_cwd);
     }
@@ -47,7 +47,7 @@ void state_set_cwd(State* state, const char* new_cwd) {
 /// @brief Get the current working directory from the state struct.
 /// @param state The state struct to get the current working directory from.
 /// @return The current working directory. NULL on failure.
-const char* state_get_cwd(State* state) {
+const char* state_get_cwd(const State* state) {
     if(state != NULL) {
         return state->cwd;
     }

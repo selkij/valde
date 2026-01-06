@@ -4,10 +4,10 @@
 /// @param str The string to strip the prefix from.
 /// @param prefix The prefix to strip.
 const char* strip_prefix(const char* str, const char* prefix) {
-    size_t len_prefix = strlen(prefix);
-    size_t len_str = strlen(str);
+    const size_t len_prefix = strlen(prefix);
+    const size_t len_str = strlen(str);
 
-    if (!str || !prefix) return false;
+    if (!str || !prefix) return NULL;
 
     if(len_str < len_prefix) {
         return str; // Prefix longer than string, nothing to do.
@@ -21,8 +21,8 @@ const char* strip_prefix(const char* str, const char* prefix) {
 }
 
 bool string_ends_with(const char* str, const char* suffix) {
-    size_t len_suffix = strlen(suffix);
-    size_t len_str = strlen(str);
+    const size_t len_suffix = strlen(suffix);
+    const size_t len_str = strlen(str);
 
     if (!str || !suffix) return false;
 
@@ -34,7 +34,7 @@ bool string_ends_with(const char* str, const char* suffix) {
 }
 
 const char* string_append_slash(const char* str) {
-    size_t len_str = strlen(str);
+    const size_t len_str = strlen(str);
 
     if(string_ends_with(str, "/")) {
         return str; // Already ends with slash.

@@ -19,12 +19,12 @@ struct entry {
   const char* path;
   struct stat st;
   struct entry* entries; // NULL if is file or directory is empty
-  size_t entry_count; // NULL if is file
+  size_t entry_count; // NULL if is a file
 };
 
-bool is_dir(struct entry* entry);
+bool entry_is_dir(const struct entry* entry);
 struct entry entry_populate(const char* path);
 int entry_populate_dir(struct entry* entry);
-void entry_info(struct entry* entry, bool include_subentries);
+void entry_info(const struct entry* entry, bool include_subentries);
 
 #endif /* ENTRY */

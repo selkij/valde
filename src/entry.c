@@ -3,7 +3,7 @@
 /// @brief Tells if the entry is a directory.
 /// @param entry The entry to check.
 /// @return returns true if entry is a directory, false otherwise.
-bool is_dir(struct entry* entry) {
+bool entry_is_dir(const struct entry* entry) {
   return S_ISDIR(entry->st.st_mode);
 }
 
@@ -19,7 +19,6 @@ struct entry entry_populate(const char* path) {
   if(lstat(path, &st) != 0) {
     printf("TEST %s\n", path);
     fprintf(stderr, "Could not populate entry %s: %s\n", path, strerror(errno));
-    perror("lstat");
     return dummy;
   }
   
@@ -61,7 +60,7 @@ int entry_populate_dir(struct entry* entry) {
   struct entry* entries = NULL;
   size_t count = 0;
 
-  // Populate entry for each entries in current directory.
+  // Populate entry for each entry in current directory.
   while((de = readdir(dir)) != NULL) {
     if(strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0) continue; // Omit ./ and ../ directories by default.
 
@@ -71,7 +70,7 @@ int entry_populate_dir(struct entry* entry) {
       free(entries);
       closedir(dir);
 
-      fprintf(stderr, "An error occured trying to realloc entries: %s\n", strerror(errno));
+      fprintf(stderr, "An error occurred trying to realloc entries: %s\n", strerror(errno));
       return ALLOCATION_FAILURE;
     }
 
@@ -82,13 +81,13 @@ int entry_populate_dir(struct entry* entry) {
     struct entry temp_entry;
 
     if(string_ends_with(entry->path, "/")) { // Whether the entry path already ends with a '/' or not.
-      size_t length = strlen(entry->path) + strlen(de->d_name) + 1; // +1 for null terminator.
+      const size_t length = strlen(entry->path) + strlen(de->d_name) + 1; // +1 for null terminator.
       char* path = malloc(length);
 
       snprintf(path, length, "%s%s", entry->path, de->d_name);
       temp_entry = entry_populate(path);
     } else {
-      size_t length = strlen(entry->path) + strlen(de->d_name) + 2; // +2 for '/' and null terminator.
+      const size_t length = strlen(entry->path) + strlen(de->d_name) + 2; // +2 for '/' and null terminator.
       char* path = malloc(length);
 
       snprintf(path, length, "%s/%s", entry->path, de->d_name);
@@ -116,8 +115,8 @@ int entry_populate_dir(struct entry* entry) {
 
 /// @brief Prints information about an entry.
 /// @param entry The entry to print information about.
-/// @param include_subentries Wether to include subentries information (if directory) or not.
-void entry_info(struct entry* entry, bool include_subentries) {
+/// @param include_subentries Whether to include subentries information (if directory) or not.
+void entry_info(const struct entry* entry, const bool include_subentries) {
   printf("File: %s\n", entry->path);
   printf("Size: %ld bytes\n", entry->st.st_size);
   printf("Permissions: %o (octal)\n", entry->st.st_mode & 0777);

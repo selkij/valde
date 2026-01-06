@@ -18,6 +18,11 @@
             "cwd": "/home/lain/Dev/valde/build/Debug",
             "binaryPath": "/home/lain/Dev/valde/build/Debug/valde",
             "binaryArgs": []
+        },
+        {
+            "cwd": "/home/liwakura/Développement/valde/build/Debug",
+            "binaryPath": "/home/liwakura/Développement/valde/build/Debug/valde",
+            "binaryArgs": []
         }
     ]
 }

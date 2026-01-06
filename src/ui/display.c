@@ -22,10 +22,10 @@ void window_free(WINDOW* win) {
 /// @brief Initialize the main windows of the screen.
 /// @param max_y Maximum Y dimension of the terminal.
 /// @param max_x Maximum X dimension of the terminal.
-Windows screen_init_windows(int max_y, int max_x) {
+Windows screen_init_windows(const int max_y, const int max_x) {
   WINDOW* tree = tree_win_init(max_y, max_x);
 
-  Windows dummy = { .tree = NULL, .content = NULL };
+  const Windows dummy = { .tree = NULL, .content = NULL };
 
   if(tree == NULL) {
       endwin();
@@ -39,7 +39,7 @@ Windows screen_init_windows(int max_y, int max_x) {
       return dummy;
   }
 
-  Windows windows = { .tree = tree, .content = content };
+  const Windows windows = { .tree = tree, .content = content };
   return windows;
 }
 
@@ -69,7 +69,7 @@ int screen_init(State* state) {
   getmaxyx(stdscr, max_y, max_x);
 
   screen_set_colors();
-  Windows windows = screen_init_windows(max_y, max_x);
+  const Windows windows = screen_init_windows(max_y, max_x);
   
   attron(COLOR_PAIR(1));
   mvprintw(0,0,"valde File Manager - %s", state_get_cwd(state));
@@ -78,6 +78,9 @@ int screen_init(State* state) {
   struct entry test = entry_populate(state_get_cwd(state));
   entry_populate_dir(&test);
   tree_list_entries(windows.tree, state, &test);
+  
+  refresh();
+  wrefresh(windows.tree);
 
   getch();
 
